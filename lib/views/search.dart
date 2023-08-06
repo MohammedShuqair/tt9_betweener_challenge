@@ -88,7 +88,31 @@ class _SearchScreenState extends State<SearchScreen> {
                                     bool isFollowed = followData!.following.any(
                                         (person) =>
                                             person.id == users[index].id!);
-                                    return ListTile(
+                                    return AccountItem(
+                                      onTapItem: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (_) =>
+                                                    AccountProfileView(
+                                                      user: users[index],
+                                                      isFollowed: isFollowed,
+                                                    ))).then((value) {
+                                          _futureFollow = ApiHelper()
+                                              .getFollowData(context);
+                                          setState(() {});
+                                        });
+                                      },
+                                      user: users[index],
+                                      isFollowed: isFollowed,
+                                      onTapFollow: (bool data) {
+                                        if (data) {
+                                          _futureFollow = ApiHelper()
+                                              .getFollowData(context);
+                                          setState(() {});
+                                        }
+                                      },
+                                    ); /*ListTile(
                                       onTap: () {
                                         Navigator.push(
                                             context,
@@ -97,7 +121,11 @@ class _SearchScreenState extends State<SearchScreen> {
                                                     AccountProfileView(
                                                       user: users[index],
                                                       isFollowed: isFollowed,
-                                                    )));
+                                                    ))).then((value) {
+                                          _futureFollow = ApiHelper()
+                                              .getFollowData(context);
+                                          setState(() {});
+                                        });
                                       },
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
@@ -125,9 +153,12 @@ class _SearchScreenState extends State<SearchScreen> {
                                               onPressed: () async {
                                                 await ApiHelper().follow(
                                                     context, users[index].id!);
+                                                setState(() {
+                                                  isFollowed = true;
+                                                });
                                               },
                                             ),
-                                    );
+                                    );*/
                                   },
                                   separatorBuilder: (_, index) =>
                                       const SizedBox(
@@ -157,6 +188,82 @@ class _SearchScreenState extends State<SearchScreen> {
               return const SizedBox();
             }
           }),
+    );
+  }
+}
+
+class AccountItem extends StatefulWidget {
+  const AccountItem(
+      {Key? key,
+      required this.onTapItem,
+      required this.user,
+      required this.isFollowed,
+      required this.onTapFollow})
+      : super(key: key);
+  final VoidCallback onTapItem;
+  final Function(bool) onTapFollow;
+  final UserClass user;
+  final bool isFollowed;
+
+  @override
+  State<AccountItem> createState() => _AccountItemState();
+}
+
+class _AccountItemState extends State<AccountItem> {
+  late bool temp;
+  @override
+  void initState() {
+    setState(() {
+      temp = widget.isFollowed;
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: widget.onTapItem,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: kPrimaryColor)),
+      leading: Icon(
+        Icons.person,
+        color: kPrimaryColor,
+      ),
+      title: Text(
+        widget.user.name ?? 'c',
+        style: const TextStyle(color: Colors.black),
+      ),
+      subtitle: Text(
+        widget.user.email ?? '',
+        style: const TextStyle(color: Colors.black),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: temp
+          ? Container(
+              padding: EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+              decoration: BoxDecoration(
+                color: kLightPrimaryColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'following',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+            )
+          : TextButton(
+              child: const Text(
+                'follow',
+              ),
+              onPressed: () async {
+                await ApiHelper().follow(context, widget.user.id!);
+                setState(() {
+                  temp = true;
+                  widget.onTapFollow(true);
+                });
+              },
+            ),
     );
   }
 }

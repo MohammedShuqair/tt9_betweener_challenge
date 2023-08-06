@@ -118,7 +118,7 @@ class _LinkScreenState extends State<LinkScreen> {
                 }
               },
               child: Container(
-                height: portrait ? null : double.infinity,
+                // height: portrait ? null : double.infinity,
                 alignment: Alignment.center,
                 padding:
                     const EdgeInsets.symmetric(vertical: 18, horizontal: 58),

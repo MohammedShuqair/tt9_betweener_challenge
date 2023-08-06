@@ -77,7 +77,7 @@ class AccountProfileView extends StatelessWidget {
   }
 }
 
-class AccountProfileData extends StatelessWidget {
+class AccountProfileData extends StatefulWidget {
   const AccountProfileData({
     Key? key,
     required this.name,
@@ -90,6 +90,20 @@ class AccountProfileData extends StatelessWidget {
   final String email;
   final bool isFollowed;
   final int id;
+
+  @override
+  State<AccountProfileData> createState() => _AccountProfileDataState();
+}
+
+class _AccountProfileDataState extends State<AccountProfileData> {
+  late bool temp;
+  @override
+  void initState() {
+    setState(() {
+      temp = widget.isFollowed;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,32 +134,38 @@ class AccountProfileData extends StatelessWidget {
                     height: 18,
                   ),
                   Text(
-                    name,
+                    widget.name,
                     style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w500,
                         fontSize: 18),
                   ),
                   Text(
-                    email,
+                    widget.email,
                     style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                   const SizedBox(
                     height: 8,
                   ),
-                  if (!isFollowed)
-                    InkWell(
-                      onTap: () async {
-                        await ApiHelper().follow(context, id);
-                      },
-                      child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 18.0, vertical: 4),
-                          decoration: BoxDecoration(
-                              color: kSecondaryColor,
-                              borderRadius: BorderRadius.circular(12)),
-                          child: Text('Follow')),
-                    )
+                  InkWell(
+                    onTap: temp
+                        ? null
+                        : () async {
+                            await ApiHelper().follow(context, widget.id);
+                            setState(() {
+                              temp = true;
+                            });
+                          },
+                    child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18.0, vertical: 4),
+                        decoration: BoxDecoration(
+                            color: temp ? kLightPrimaryColor : kSecondaryColor,
+                            borderRadius: BorderRadius.circular(12)),
+                        child: Text(
+                          temp ? 'Following' : 'Follow',
+                        )),
+                  )
                 ],
               ),
             )

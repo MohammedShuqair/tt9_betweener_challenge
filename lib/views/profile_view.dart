@@ -14,6 +14,7 @@ import 'package:tt9_betweener_challenge/views/widgets/network_error_message.dart
 import 'package:url_launcher/url_launcher.dart';
 
 import '../controllers/link_controller.dart';
+import 'follow_list.dart';
 
 class ProfileView extends StatefulWidget {
   static String id = '/profileView';
@@ -249,8 +250,10 @@ class _ProfileDataState extends State<ProfileData> {
   UserClass? user;
   late String name;
   late String email;
-  String? followers;
-  String? following;
+  List<UserClass> followers = [];
+  List<UserClass> following = [];
+  String? followersCount;
+  String? followingCount;
   bool getFollowError = false;
 
   String formatFollow(int category, int num) {
@@ -285,10 +288,12 @@ class _ProfileDataState extends State<ProfileData> {
   void initState() {
     _future = ApiHelper().getFollowData(context);
     _future.then((value) {
-      print(value.followers.first.email);
-      followers = followCount(value.followersCount ?? 0);
-      following = followCount(value.followingCount ?? 0);
-      setState(() {});
+      followersCount = followCount(value.followersCount ?? 0);
+      followingCount = followCount(value.followingCount ?? 0);
+      setState(() {
+        following = value.following;
+        followers = value.followers;
+      });
     }).catchError((e) {
       setState(() {
         getFollowError = true;
@@ -386,20 +391,76 @@ class _ProfileDataState extends State<ProfileData> {
                       Row(
                         children: [
                           Expanded(
-                            child: FollowInfo(
-                              hint: 'followers',
-                              number: followers,
-                              isError: getFollowError,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => FollowList(
+                                              users: followers,
+                                              title: 'Followers',
+                                              isFollow: false,
+                                            ))).then((value) {
+                                  _future = ApiHelper().getFollowData(context);
+                                  _future.then((value) {
+                                    followersCount =
+                                        followCount(value.followersCount ?? 0);
+                                    followingCount =
+                                        followCount(value.followingCount ?? 0);
+                                    setState(() {
+                                      following = value.following;
+                                      followers = value.followers;
+                                    });
+                                  }).catchError((e) {
+                                    setState(() {
+                                      getFollowError = true;
+                                    });
+                                  });
+                                });
+                              },
+                              child: FollowInfo(
+                                hint: 'followers',
+                                number: followersCount,
+                                isError: getFollowError,
+                              ),
                             ),
                           ),
                           const SizedBox(
                             width: 8,
                           ),
                           Expanded(
-                            child: FollowInfo(
-                              hint: 'following',
-                              number: following,
-                              isError: getFollowError,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => FollowList(
+                                              users: following,
+                                              title: 'Following',
+                                              isFollow: true,
+                                            ))).then((value) {
+                                  _future = ApiHelper().getFollowData(context);
+                                  _future.then((value) {
+                                    followersCount =
+                                        followCount(value.followersCount ?? 0);
+                                    followingCount =
+                                        followCount(value.followingCount ?? 0);
+                                    setState(() {
+                                      following = value.following;
+                                      followers = value.followers;
+                                    });
+                                  }).catchError((e) {
+                                    setState(() {
+                                      getFollowError = true;
+                                    });
+                                  });
+                                });
+                              },
+                              child: FollowInfo(
+                                hint: 'following',
+                                number: followingCount,
+                                isError: getFollowError,
+                              ),
                             ),
                           ),
                         ],
@@ -435,6 +496,7 @@ class FollowInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(isError);
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
         decoration: BoxDecoration(

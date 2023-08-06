@@ -70,8 +70,10 @@ class ApiHelper {
           "password": password,
           "password_confirmation": passwordConfirmation
         });
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       Navigator.pushReplacementNamed(context, LoginView.id);
+    } else if (response.statusCode == 200) {
+      showAlert(context, message: 'This email is used before');
     } else {
       return Future.error('failed to register');
     }
@@ -125,6 +127,7 @@ class ApiHelper {
     if (response.statusCode == 401) {
       Navigator.pushReplacementNamed(context, LoginView.id);
     }
+    print(response.body);
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
 

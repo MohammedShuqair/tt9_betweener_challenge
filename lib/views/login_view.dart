@@ -96,7 +96,8 @@ class _LoginViewState extends State<LoginView> {
                                   context, MainAppView.id);
                             }
                           }).catchError((e) {
-                            showAlert(context, message: e.toString());
+                            showAlert(context,
+                                message: 'please check internet connection ');
                           });
                         }
                       },
