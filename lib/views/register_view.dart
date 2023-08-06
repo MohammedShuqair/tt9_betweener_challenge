@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tt9_betweener_challenge/assets.dart';
+import 'package:tt9_betweener_challenge/controllers/api_helper.dart';
+import 'package:tt9_betweener_challenge/views/widgets/alert.dart';
 import 'package:tt9_betweener_challenge/views/widgets/custom_text_form_field.dart';
 import 'package:tt9_betweener_challenge/views/widgets/secondary_button_widget.dart';
 
@@ -16,11 +18,31 @@ class RegisterView extends StatefulWidget {
 }
 
 class _RegisterViewState extends State<RegisterView> {
-  TextEditingController nameController = TextEditingController();
+  late TextEditingController nameController;
 
-  TextEditingController emailController = TextEditingController();
+  late TextEditingController emailController;
 
-  TextEditingController passwordController = TextEditingController();
+  late TextEditingController passwordController;
+
+  late TextEditingController confirmPasswordController;
+
+  @override
+  void initState() {
+    nameController = TextEditingController();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   final _formKey = GlobalKey<FormState>();
 
@@ -84,9 +106,29 @@ class _RegisterViewState extends State<RegisterView> {
                   const SizedBox(
                     height: 24,
                   ),
+                  CustomTextFormField(
+                    controller: confirmPasswordController,
+                    hint: 'Confirm  Password',
+                    label: 'Confirm Password',
+                    password: true,
+                  ),
+                  const SizedBox(
+                    height: 24,
+                  ),
                   SecondaryButtonWidget(
                       onTap: () {
-                        if (_formKey.currentState!.validate()) {}
+                        if (_formKey.currentState!.validate()) {
+                          ApiHelper()
+                              .register(context,
+                                  email: emailController.text,
+                                  name: nameController.text,
+                                  password: passwordController.text,
+                                  passwordConfirmation:
+                                      confirmPasswordController.text)
+                              .catchError((e) {
+                            showAlert(context, message: e.toString());
+                          });
+                        }
                       },
                       text: 'REGISTER'),
                   const SizedBox(

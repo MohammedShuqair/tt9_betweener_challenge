@@ -2,12 +2,16 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tt9_betweener_challenge/assets.dart';
+import 'package:tt9_betweener_challenge/controllers/api_helper.dart';
+import 'package:tt9_betweener_challenge/models/user.dart';
 import 'package:tt9_betweener_challenge/views/main_app_view.dart';
 import 'package:tt9_betweener_challenge/views/register_view.dart';
+import 'package:tt9_betweener_challenge/views/widgets/alert.dart';
 import 'package:tt9_betweener_challenge/views/widgets/custom_text_form_field.dart';
 import 'package:tt9_betweener_challenge/views/widgets/primary_outlined_button_widget.dart';
 import 'package:tt9_betweener_challenge/views/widgets/secondary_button_widget.dart';
 
+import '../controllers/shared_helper.dart';
 import 'widgets/google_button_widget.dart';
 
 class LoginView extends StatefulWidget {
@@ -78,9 +82,22 @@ class _LoginViewState extends State<LoginView> {
                     height: 24,
                   ),
                   SecondaryButtonWidget(
-                      onTap: () {
+                      onTap: () async {
                         if (_formKey.currentState!.validate()) {
-                          Navigator.pushNamed(context, MainAppView.id);
+                          ApiHelper()
+                              .login(
+                                  emailController.text, passwordController.text)
+                              .then((user) async {
+                            SharedHelper shared = SharedHelper();
+                            shared.setToken(user.token!);
+                            await shared.setUser(userToJson(user));
+                            if (mounted) {
+                              Navigator.pushReplacementNamed(
+                                  context, MainAppView.id);
+                            }
+                          }).catchError((e) {
+                            showAlert(context, message: e.toString());
+                          });
                         }
                       },
                       text: 'LOGIN'),

@@ -9,6 +9,7 @@ class CustomTextFormField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final Iterable<String>? autofillHints;
+  final ValueChanged<String>? onChanged;
   const CustomTextFormField(
       {super.key,
       required this.label,
@@ -17,7 +18,8 @@ class CustomTextFormField extends StatelessWidget {
       this.password = false,
       this.keyboardType,
       this.validator,
-      this.autofillHints});
+      this.autofillHints,
+      this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,7 @@ class CustomTextFormField extends StatelessWidget {
           height: 12,
         ),
         TextFormField(
+          onChanged: onChanged,
           keyboardType: keyboardType,
           controller: controller,
           validator: validator,

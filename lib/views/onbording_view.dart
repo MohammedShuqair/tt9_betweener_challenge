@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tt9_betweener_challenge/assets.dart';
 import 'package:tt9_betweener_challenge/constants.dart';
+import 'package:tt9_betweener_challenge/controllers/shared_helper.dart';
 import 'package:tt9_betweener_challenge/views/login_view.dart';
 import 'package:tt9_betweener_challenge/views/widgets/secondary_button_widget.dart';
 
@@ -31,8 +32,10 @@ class OnBoardingView extends StatelessWidget {
             SecondaryButtonWidget(
               text: 'Get Started',
               width: double.infinity,
-              onTap: () {
-                Navigator.pushNamed(context, LoginView.id);
+              onTap: () async{
+               await SharedHelper().setIsFirst(false);
+
+                Navigator.pushReplacementNamed(context, LoginView.id);
               },
             ),
             const Spacer()
