@@ -33,23 +33,34 @@ class _ActiveSharingState extends State<ActiveSharing> {
   }
 
   Future<bool> algorithm() async {
-    Location location = await getLocation().catchError((e) {
-      showDialog(
-          context: context,
-          builder: (_) => const AlertDialog(
-                content: NetworkErrorMessage(
-                  hint:
-                      'Please give the app permission to determine your current location',
-                ),
-              ));
-    });
-    print('false');
-    bool done = await updateUserLocation(location).catchError((e) {
-      showDialog(
-          context: context,
-          builder: (_) => const AlertDialog(
-                content: NetworkErrorMessage(),
-              ));
+    bool done = false;
+    getLocation().then((location) async {
+      done = await updateUserLocation(location).catchError((e) {
+        showDialog(
+            context: context,
+            builder: (_) => const AlertDialog(
+                  content: NetworkErrorMessage(),
+                ));
+      });
+    }).catchError((e) {
+      if (e is LocationServiceException) {
+        showDialog(
+            context: context,
+            builder: (_) => const AlertDialog(
+                  content: NetworkErrorMessage(
+                    hint: 'please enable location service',
+                  ),
+                ));
+      }
+      if (e is LocationPermissionsException) {
+        showDialog(
+            context: context,
+            builder: (_) => const AlertDialog(
+                  content: NetworkErrorMessage(
+                    hint: 'please give betweener permission to act like Sender',
+                  ),
+                ));
+      }
     });
     if (done) {
       return true;
@@ -81,22 +92,24 @@ class _ActiveSharingState extends State<ActiveSharing> {
           ),
           Expanded(
             child: CustomButton(
-              onTap: () async {
-                if (await algorithm()) {
-                  bool done = await setSharingType('sender').catchError((e) {
-                    showDialog(
-                        context: context,
-                        builder: (_) => const AlertDialog(
-                              content: NetworkErrorMessage(),
-                            ));
-                  });
-                  if (done && mounted) {
-                    Navigator.pushNamed(context, SenderView.id)
-                        .then((value) async {
-                      await ApiHelper().removeActiveSharing(context, id);
+              onTap: () {
+                algorithm().then((locationDone) async {
+                  if (locationDone) {
+                    bool done = await setSharingType('sender').catchError((e) {
+                      showDialog(
+                          context: context,
+                          builder: (_) => const AlertDialog(
+                                content: NetworkErrorMessage(),
+                              ));
                     });
+                    if (done && mounted) {
+                      Navigator.pushNamed(context, SenderView.id)
+                          .then((value) async {
+                        await ApiHelper().removeActiveSharing(context, id);
+                      });
+                    }
                   }
-                }
+                });
               },
               hint: 'Sender',
             ),

@@ -2,13 +2,16 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tt9_betweener_challenge/constants.dart';
 import 'package:tt9_betweener_challenge/controllers/api_helper.dart';
+import 'package:tt9_betweener_challenge/controllers/location.dart';
 import 'package:tt9_betweener_challenge/controllers/shared_helper.dart';
 import 'package:tt9_betweener_challenge/models/follow_data.dart';
 import 'package:tt9_betweener_challenge/models/link.dart';
 import 'package:tt9_betweener_challenge/models/user.dart';
 import 'package:tt9_betweener_challenge/views/add_link_screen.dart';
+import 'package:tt9_betweener_challenge/views/map_view.dart';
 import 'package:tt9_betweener_challenge/views/widgets/alert.dart';
 import 'package:tt9_betweener_challenge/views/widgets/network_error_message.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,11 +30,42 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   late Future<List<Link>> _futureLinks;
+  late Future<Location> _futureLocation;
   List<Link> links = [];
+  Future<Location> getLocation() async {
+    Location location = Location();
+    await location.getCurrentLocation();
+    return location;
+  }
+
+  Future<Location> algorithm() async {
+    bool done = false;
+    return await getLocation().catchError((e) {
+      if (e is LocationServiceException) {
+        showDialog(
+            context: context,
+            builder: (_) => const AlertDialog(
+                  content: NetworkErrorMessage(
+                    hint: 'please enable location service',
+                  ),
+                ));
+      }
+      if (e is LocationPermissionsException) {
+        showDialog(
+            context: context,
+            builder: (_) => const AlertDialog(
+                  content: NetworkErrorMessage(
+                    hint: 'please give betweener permission to act like Sender',
+                  ),
+                ));
+      }
+    });
+  }
 
   @override
   void initState() {
     _futureLinks = getLinks(context);
+    _futureLocation = algorithm();
     super.initState();
   }
 
@@ -176,7 +210,21 @@ class _ProfileViewState extends State<ProfileView> {
                     }),
                 const SizedBox(
                   height: 24.0,
-                )
+                ),
+                FutureBuilder<Location>(
+                    future: _futureLocation,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return SizedBox(
+                          height: 300,
+                          child: MapView(
+                              latLng: LatLng(
+                                  snapshot.data!.lat, snapshot.data!.long)),
+                        );
+                      } else {
+                        return const SizedBox();
+                      }
+                    })
               ],
             ),
           ),
