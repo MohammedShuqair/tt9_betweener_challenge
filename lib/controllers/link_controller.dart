@@ -6,7 +6,7 @@ import 'package:tt9_betweener_challenge/controllers/api_settings.dart';
 import 'package:tt9_betweener_challenge/controllers/shared_helper.dart';
 import 'package:tt9_betweener_challenge/views/login_view.dart';
 
-import '../models/link.dart';
+import '../features/profile/links/model/link.dart';
 import 'package:http/http.dart' as http;
 
 Future<List<Link>> getLinks(context) async {
@@ -14,6 +14,8 @@ Future<List<Link>> getLinks(context) async {
       headers: {'Authorization': 'Bearer ${SharedHelper().getToken()}'});
 
   if (response.statusCode == 200) {
+    print('Link data');
+    print(jsonDecode(response.body));
     final data = jsonDecode(response.body)['links'] as List<dynamic>;
 
     return data.map((e) => Link.fromJson(e)).toList();

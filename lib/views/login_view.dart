@@ -1,9 +1,12 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:tt9_betweener_challenge/assets.dart';
 import 'package:tt9_betweener_challenge/controllers/api_helper.dart';
-import 'package:tt9_betweener_challenge/models/user.dart';
+import 'package:tt9_betweener_challenge/core/util/api_response.dart';
+import 'package:tt9_betweener_challenge/features/auth/model/user.dart';
+import 'package:tt9_betweener_challenge/features/auth/provider/auth_provider.dart';
 import 'package:tt9_betweener_challenge/views/main_app_view.dart';
 import 'package:tt9_betweener_challenge/views/register_view.dart';
 import 'package:tt9_betweener_challenge/views/widgets/alert.dart';
@@ -12,6 +15,7 @@ import 'package:tt9_betweener_challenge/views/widgets/primary_outlined_button_wi
 import 'package:tt9_betweener_challenge/views/widgets/secondary_button_widget.dart';
 
 import '../controllers/shared_helper.dart';
+import '../core/util/shared_mrthodes.dart';
 import 'widgets/google_button_widget.dart';
 
 class LoginView extends StatefulWidget {
@@ -24,9 +28,23 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,27 +99,49 @@ class _LoginViewState extends State<LoginView> {
                   const SizedBox(
                     height: 24,
                   ),
-                  SecondaryButtonWidget(
-                      onTap: () async {
-                        if (_formKey.currentState!.validate()) {
-                          ApiHelper()
-                              .login(
-                                  emailController.text, passwordController.text)
-                              .then((user) async {
-                            SharedHelper shared = SharedHelper();
-                            shared.setToken(user.token!);
-                            await shared.setUser(userToJson(user));
-                            if (mounted) {
-                              Navigator.pushReplacementNamed(
-                                  context, MainAppView.id);
+                  Consumer<AuthProvider>(
+                    builder: (context, provider, child) {
+                      return SecondaryButtonWidget(
+                          onTap: () async {
+                            if (_formKey.currentState!.validate()) {
+                              await provider.loginUser(emailController.text,
+                                  passwordController.text);
+                              if (mounted) {
+                                handelResponseStatus(
+                                    provider.loginResponse.status, context,
+                                    message: provider.loginResponse.message,
+                                    onComplete: () async {
+                                  User? user = provider.loginResponse.data;
+                                  if (user != null) {
+                                    SharedHelper shared = SharedHelper();
+                                    shared.setToken(user.token!);
+                                    await shared.setUser(userToJson(user));
+                                    if (mounted) {
+                                      Navigator.pushReplacementNamed(
+                                          context, MainAppView.id);
+                                    }
+                                  }
+                                });
+                              }
+
+                              //     .then((user) async {
+                              //   SharedHelper shared = SharedHelper();
+                              //   shared.setToken(user.token!);
+                              //   await shared.setUser(userToJson(user));
+                              //   if (mounted) {
+                              //     Navigator.pushReplacementNamed(
+                              //         context, MainAppView.id);
+                              //   }
+                              // }).catchError((e) {
+                              //   showAlert(context,
+                              //       message:
+                              //           'please check internet connection ');
+                              // });
                             }
-                          }).catchError((e) {
-                            showAlert(context,
-                                message: 'please check internet connection ');
-                          });
-                        }
-                      },
-                      text: 'LOGIN'),
+                          },
+                          text: 'LOGIN');
+                    },
+                  ),
                   const SizedBox(
                     height: 24,
                   ),

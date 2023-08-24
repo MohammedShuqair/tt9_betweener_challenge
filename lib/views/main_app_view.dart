@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tt9_betweener_challenge/features/profile/links/provider/link_provider.dart';
 import 'package:tt9_betweener_challenge/views/home_view.dart';
 import 'package:tt9_betweener_challenge/views/profile_view.dart';
 import 'package:tt9_betweener_challenge/views/receive_view.dart';
@@ -42,6 +44,7 @@ class _MainAppViewState extends State<MainAppView> {
       hint: "Profile",
     ),
   ];
+
   @override
   void dispose() {
     controller.dispose();
@@ -50,26 +53,29 @@ class _MainAppViewState extends State<MainAppView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appbars[_currentIndex],
-      body: PageView(
-        controller: controller,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        children: screensList,
-      ),
-      // extendBody: true,
-      bottomNavigationBar: CustomFloatingNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          controller.jumpToPage(index);
-        },
+    return ChangeNotifierProvider(
+      create: (BuildContext context) => LinkProvider(),
+      child: Scaffold(
+        appBar: appbars[_currentIndex],
+        body: PageView(
+          controller: controller,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          children: screensList,
+        ),
+        // extendBody: true,
+        bottomNavigationBar: CustomFloatingNavBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+            controller.jumpToPage(index);
+          },
+        ),
       ),
     );
   }

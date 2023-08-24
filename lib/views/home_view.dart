@@ -3,16 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:tt9_betweener_challenge/controllers/link_controller.dart';
-import 'package:tt9_betweener_challenge/models/link.dart';
+import 'package:tt9_betweener_challenge/features/profile/links/model/link.dart';
 import 'package:tt9_betweener_challenge/views/add_link_screen.dart';
 import 'package:tt9_betweener_challenge/views/widgets/alert.dart';
 import 'package:tt9_betweener_challenge/views/widgets/network_error_message.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constants.dart';
-import '../controllers/network_connectivity.dart';
 import '../controllers/user_controller.dart';
-import '../models/user.dart';
+import '../features/auth/model/user.dart';
 
 class HomeView extends StatefulWidget {
   static String id = '/homeView';

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:tt9_betweener_challenge/features/auth/provider/auth_provider.dart';
 import 'package:tt9_betweener_challenge/views/add_link_screen.dart';
 import 'package:tt9_betweener_challenge/views/home_view.dart';
 import 'package:tt9_betweener_challenge/views/loading_screen.dart';
@@ -27,38 +29,45 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Betweener',
-      theme: ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: kPrimaryColor,
-          progressIndicatorTheme: const ProgressIndicatorThemeData(
-            color: kPrimaryColor,
-          ),
-          appBarTheme: const AppBarTheme(
-            systemOverlayStyle: SystemUiOverlayStyle(
-                statusBarBrightness: Brightness.dark,
-                statusBarIconBrightness: Brightness.dark),
-            titleTextStyle: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: kPrimaryColor),
-          ),
-          scaffoldBackgroundColor: kScaffoldColor),
-      home: const LoadingScreen(),
-      routes: {
-        OnBoardingView.id: (context) => const OnBoardingView(),
-        LoginView.id: (context) => const LoginView(),
-        RegisterView.id: (context) => const RegisterView(),
-        HomeView.id: (context) => const HomeView(),
-        MainAppView.id: (context) => const MainAppView(),
-        ProfileView.id: (context) => const ProfileView(),
-        ReceiveView.id: (context) => const ReceiveView(),
-        LinkScreen.addId: (context) => const LinkScreen.add(),
-        SearchScreen.id: (context) => const SearchScreen(),
-        SenderView.id: (context) => const SenderView(),
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Betweener',
+        theme: ThemeData(
+            useMaterial3: true,
+            colorSchemeSeed: kPrimaryColor,
+            progressIndicatorTheme: const ProgressIndicatorThemeData(
+              color: kPrimaryColor,
+            ),
+            appBarTheme: const AppBarTheme(
+              systemOverlayStyle: SystemUiOverlayStyle(
+                  statusBarBrightness: Brightness.dark,
+                  statusBarIconBrightness: Brightness.dark),
+              titleTextStyle: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: kPrimaryColor),
+            ),
+            scaffoldBackgroundColor: kScaffoldColor),
+        home: const LoadingScreen(),
+        routes: {
+          OnBoardingView.id: (context) => const OnBoardingView(),
+          LoginView.id: (context) => const LoginView(),
+          RegisterView.id: (context) => const RegisterView(),
+          HomeView.id: (context) => const HomeView(),
+          MainAppView.id: (context) => const MainAppView(),
+          ProfileView.id: (context) => const ProfileView(),
+          ReceiveView.id: (context) => const ReceiveView(),
+          LinkScreen.addId: (context) => const LinkScreen.add(),
+          SearchScreen.id: (context) => const SearchScreen(),
+          SenderView.id: (context) => const SenderView(),
+        },
+      ),
     );
   }
 }

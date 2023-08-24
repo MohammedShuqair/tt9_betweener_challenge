@@ -9,7 +9,7 @@ import 'package:tt9_betweener_challenge/views/widgets/profile_appbar.dart';
 import 'package:tt9_betweener_challenge/views/widgets/sub_appbar.dart';
 
 import '../constants.dart';
-import '../models/user.dart';
+import '../features/auth/model/user.dart';
 import 'account_profile_view.dart';
 
 class ReceiveView extends StatefulWidget {

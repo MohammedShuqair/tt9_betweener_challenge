@@ -6,7 +6,7 @@ import 'package:tt9_betweener_challenge/views/widgets/custom_text_form_field.dar
 import 'package:tt9_betweener_challenge/views/widgets/network_error_message.dart';
 
 import '../models/follow_data.dart';
-import '../models/user.dart';
+import '../features/auth/model/user.dart';
 
 class SearchScreen extends StatefulWidget {
   static String id = "/search_screen";

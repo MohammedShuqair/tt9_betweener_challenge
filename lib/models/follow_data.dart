@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:tt9_betweener_challenge/models/user.dart';
+import 'package:tt9_betweener_challenge/features/auth/model/user.dart';
 
 FollowData followDataFromJson(String str) =>
     FollowData.fromJson(json.decode(str));

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tt9_betweener_challenge/models/user.dart';
+import 'package:tt9_betweener_challenge/features/auth/model/user.dart';
 import 'package:tt9_betweener_challenge/views/widgets/sub_appbar.dart';
 
 import '../constants.dart';

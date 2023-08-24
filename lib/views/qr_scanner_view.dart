@@ -7,7 +7,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:tt9_betweener_challenge/constants.dart';
 import 'package:tt9_betweener_challenge/controllers/api_helper.dart';
 import 'package:tt9_betweener_challenge/models/follow_data.dart';
-import 'package:tt9_betweener_challenge/models/user.dart';
+import 'package:tt9_betweener_challenge/features/auth/model/user.dart';
 import 'package:tt9_betweener_challenge/views/account_profile_view.dart';
 import 'package:tt9_betweener_challenge/views/widgets/network_error_message.dart';
 
@@ -40,7 +40,9 @@ class _QrScannerViewState extends State<QrScannerView> {
           Map<String, dynamic> data = jsonDecode(result!.code!);
 
           /*List<UserClass> sameNameUsers = await*/
-          ApiHelper().search(data["name"],context: context).then((sameNameUsers) {
+          ApiHelper()
+              .search(data["name"], context: context)
+              .then((sameNameUsers) {
             UserClass? foundedUser;
             sameNameUsers.forEach((user) {
               if (user.id.toString() == data["id"]) {

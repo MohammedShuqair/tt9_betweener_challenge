@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:tt9_betweener_challenge/controllers/shared_helper.dart';
 import 'package:tt9_betweener_challenge/models/follow_data.dart';
-import 'package:tt9_betweener_challenge/models/link.dart';
+import 'package:tt9_betweener_challenge/features/profile/links/model/link.dart';
 import 'package:tt9_betweener_challenge/models/sender.dart';
-import 'package:tt9_betweener_challenge/models/user.dart';
+import 'package:tt9_betweener_challenge/features/auth/model/user.dart';
 import 'package:tt9_betweener_challenge/views/login_view.dart';
 import 'package:tt9_betweener_challenge/views/widgets/alert.dart';
 

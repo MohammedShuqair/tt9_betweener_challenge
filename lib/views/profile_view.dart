@@ -3,17 +3,20 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:tt9_betweener_challenge/constants.dart';
 import 'package:tt9_betweener_challenge/controllers/api_helper.dart';
 import 'package:tt9_betweener_challenge/controllers/location.dart';
 import 'package:tt9_betweener_challenge/controllers/shared_helper.dart';
+import 'package:tt9_betweener_challenge/features/profile/links/provider/link_provider.dart';
 import 'package:tt9_betweener_challenge/models/follow_data.dart';
-import 'package:tt9_betweener_challenge/models/link.dart';
-import 'package:tt9_betweener_challenge/models/user.dart';
+import 'package:tt9_betweener_challenge/features/profile/links/model/link.dart';
+import 'package:tt9_betweener_challenge/features/auth/model/user.dart';
 import 'package:tt9_betweener_challenge/views/add_link_screen.dart';
 import 'package:tt9_betweener_challenge/views/map_view.dart';
 import 'package:tt9_betweener_challenge/views/widgets/alert.dart';
 import 'package:tt9_betweener_challenge/views/widgets/network_error_message.dart';
+import 'package:tt9_betweener_challenge/views/widgets/responce_builder.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../controllers/link_controller.dart';
@@ -64,7 +67,10 @@ class _ProfileViewState extends State<ProfileView> {
 
   @override
   void initState() {
-    _futureLinks = getLinks(context);
+    _futureLinks = getLinks(context).catchError((e, s) {
+      print(e.toString());
+      print(s.toString());
+    });
     _futureLocation = algorithm();
     super.initState();
   }
@@ -82,132 +88,148 @@ class _ProfileViewState extends State<ProfileView> {
                   height: 24.0,
                 ),
                 const ProfileData(),
-                FutureBuilder<List<Link>>(
-                    future: _futureLinks,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        links = snapshot.data ?? [];
-                        return ListView.separated(
-                            physics: const NeverScrollableScrollPhysics(),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 24,
-                            ),
-                            shrinkWrap: true,
-                            itemBuilder: (_, index) {
-                              bool isEven = index % 2 == 0;
-                              Color backgroundColor = isEven
-                                  ? kLightDangerColor
-                                  : kLightPrimaryColor;
-                              Color foregroundColor =
-                                  isEven ? kOnLightDangerColor : kLinksColor;
+                Consumer<LinkProvider>(
+                  builder: (context, provider, child) {
+                    return ResponseBuilder(
+                        response: provider.linkList,
+                        onError: (context, message) {
+                          return const Padding(
+                            padding: EdgeInsets.only(top: 18.0),
+                            child: NetworkErrorMessage(),
+                          );
+                        },
+                        onLoading: (context, message) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 38.0),
+                            child: LinearProgressIndicator(),
+                          );
+                        },
+                        onComplete: (context, data, message) {
+                          links = data ?? [];
+                          return ListView.separated(
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 24,
+                              ),
+                              shrinkWrap: true,
+                              itemBuilder: (_, index) {
+                                bool isEven = index % 2 == 0;
+                                Color backgroundColor = isEven
+                                    ? kLightDangerColor
+                                    : kLightPrimaryColor;
+                                Color foregroundColor =
+                                    isEven ? kOnLightDangerColor : kLinksColor;
 
-                              return Slidable(
-                                endActionPane: ActionPane(
-                                    motion: const ScrollMotion(),
-                                    children: [
-                                      const Spacer(),
-                                      CustomSlidableAction(
-                                        flex: 5,
-                                        padding: EdgeInsets.zero,
-                                        onPressed: (BuildContext context) {
-                                          Navigator.push<bool>(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      LinkScreen.edit(
-                                                        link: links[index],
-                                                      ))).then((bool? value) {
-                                            if (value != null && value) {
-                                              _futureLinks = getLinks(context);
-                                              setState(() {});
-                                            }
-                                          });
-                                        },
-                                        borderRadius: BorderRadius.circular(18),
-                                        backgroundColor: kSecondaryColor,
-                                        child: const Icon(
-                                          Icons.edit,
-                                          color: Colors.white,
-                                          size: 40,
+                                return Slidable(
+                                  endActionPane: ActionPane(
+                                      motion: const ScrollMotion(),
+                                      children: [
+                                        const Spacer(),
+                                        CustomSlidableAction(
+                                          flex: 5,
+                                          padding: EdgeInsets.zero,
+                                          onPressed: (BuildContext context) {
+                                            Navigator.push<bool>(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        LinkScreen.edit(
+                                                          link: links[index],
+                                                        ))).then((bool? value) {
+                                              if (value != null && value) {
+                                                _futureLinks =
+                                                    getLinks(context);
+                                                setState(() {});
+                                              }
+                                            });
+                                          },
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                          backgroundColor: kSecondaryColor,
+                                          child: const Icon(
+                                            Icons.edit,
+                                            color: Colors.white,
+                                            size: 40,
+                                          ),
                                         ),
-                                      ),
-                                      const Spacer(),
-                                      CustomSlidableAction(
-                                        flex: 5,
-                                        onPressed:
-                                            (BuildContext context) async {
-                                          showDialog<bool>(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                    title: const Text(
-                                                        'Confirm link deletion'),
-                                                    actions: [
-                                                      TextButton(
-                                                          onPressed: () async {
-                                                            bool result =
-                                                                await ApiHelper()
-                                                                    .deleteLink(
+                                        const Spacer(),
+                                        CustomSlidableAction(
+                                          flex: 5,
+                                          onPressed:
+                                              (BuildContext context) async {
+                                            showDialog<bool>(
+                                                context: context,
+                                                builder:
+                                                    (context) => AlertDialog(
+                                                          title: const Text(
+                                                              'Confirm link deletion'),
+                                                          actions: [
+                                                            TextButton(
+                                                                onPressed:
+                                                                    () async {
+                                                                  bool result = await ApiHelper().deleteLink(
+                                                                      context,
+                                                                      links[index]
+                                                                          .id!);
+                                                                  if (mounted) {
+                                                                    Navigator.pop(
                                                                         context,
-                                                                        links[index]
-                                                                            .id!);
-                                                            if (mounted) {
-                                                              Navigator.pop(
-                                                                  context,
-                                                                  result);
-                                                            }
-                                                          },
-                                                          child: const Text(
-                                                              'confirm')),
-                                                      TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context, false);
-                                                          },
-                                                          child: const Text(
-                                                              'cancel')),
-                                                    ],
-                                                  )).then((result) {
-                                            if (result != null && result) {
-                                              _futureLinks = getLinks(context);
-                                              setState(() {});
-                                            }
-                                          });
-                                        },
-                                        padding: EdgeInsets.zero,
-                                        borderRadius: BorderRadius.circular(18),
-                                        backgroundColor: kDangerColor,
-                                        child: const Icon(
-                                          Icons.delete,
-                                          color: Colors.white,
-                                          size: 40,
+                                                                        result);
+                                                                  }
+                                                                },
+                                                                child: const Text(
+                                                                    'confirm')),
+                                                            TextButton(
+                                                                onPressed: () {
+                                                                  Navigator.pop(
+                                                                      context,
+                                                                      false);
+                                                                },
+                                                                child: const Text(
+                                                                    'cancel')),
+                                                          ],
+                                                        )).then((result) {
+                                              if (result != null && result) {
+                                                _futureLinks =
+                                                    getLinks(context);
+                                                setState(() {});
+                                              }
+                                            });
+                                          },
+                                          padding: EdgeInsets.zero,
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                          backgroundColor: kDangerColor,
+                                          child: const Icon(
+                                            Icons.delete,
+                                            color: Colors.white,
+                                            size: 40,
+                                          ),
                                         ),
-                                      ),
-                                    ]),
-                                child: ProfileLinkWidget(
-                                    backgroundColor: backgroundColor,
-                                    link: links[index],
-                                    foregroundColor: foregroundColor),
-                              );
-                            },
-                            separatorBuilder: (_, index) => const SizedBox(
-                                  height: 28,
-                                ),
-                            itemCount: links.length);
-                      }
-                      if (snapshot.hasError) {
-                        return const Padding(
-                          padding: EdgeInsets.only(top: 18.0),
-                          child: NetworkErrorMessage(),
-                        );
-                      }
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 38.0),
-                          child: LinearProgressIndicator(),
-                        );
-                      }
-                      return const SizedBox();
-                    }),
+                                      ]),
+                                  child: ProfileLinkWidget(
+                                      backgroundColor: backgroundColor,
+                                      link: links[index],
+                                      foregroundColor: foregroundColor),
+                                );
+                              },
+                              separatorBuilder: (_, index) => const SizedBox(
+                                    height: 28,
+                                  ),
+                              itemCount: links.length);
+                        });
+                  },
+                ),
+                // FutureBuilder<List<Link>>(
+                //     future: _futureLinks,
+                //     builder: (context, snapshot) {
+                //       if (snapshot.hasData) {}
+                //       if (snapshot.hasError) {}
+                //       if (snapshot.connectionState == ConnectionState.waiting) {
+                //
+                //       }
+                //       return const SizedBox();
+                //     }),
                 const SizedBox(
                   height: 24.0,
                 ),

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:tt9_betweener_challenge/models/user.dart';
+import 'package:tt9_betweener_challenge/features/auth/model/user.dart';
 
 Sender senderFromJson(String str) => Sender.fromJson(json.decode(str));
 

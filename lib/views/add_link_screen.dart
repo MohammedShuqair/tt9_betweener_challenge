@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tt9_betweener_challenge/constants.dart';
 import 'package:tt9_betweener_challenge/controllers/api_helper.dart';
-import 'package:tt9_betweener_challenge/models/link.dart';
+import 'package:tt9_betweener_challenge/features/profile/links/model/link.dart';
 import 'package:tt9_betweener_challenge/views/widgets/custom_text_form_field.dart';
 import 'package:tt9_betweener_challenge/views/widgets/sub_appbar.dart';
 

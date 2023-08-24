@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:tt9_betweener_challenge/models/link.dart';
+import 'package:tt9_betweener_challenge/features/profile/links/model/link.dart';
 
 User userFromJson(String str) => User.fromJson(json.decode(str));
 
@@ -33,7 +33,7 @@ class UserClass {
   dynamic emailVerifiedAt;
   String? createdAt;
   String? updatedAt;
-  int? isActive;
+  String? isActive;
   dynamic country;
   dynamic ip;
   dynamic long;
@@ -52,7 +52,7 @@ class UserClass {
       this.ip,
       this.long,
       this.lat,
-      required this.links});
+      this.links});
 
   factory UserClass.fromJson(Map<String, dynamic> json) {
     List? l = json["links"] as List?;

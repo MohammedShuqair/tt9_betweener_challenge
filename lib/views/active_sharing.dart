@@ -3,7 +3,7 @@ import 'package:tt9_betweener_challenge/constants.dart';
 import 'package:tt9_betweener_challenge/controllers/api_helper.dart';
 import 'package:tt9_betweener_challenge/controllers/location.dart';
 import 'package:tt9_betweener_challenge/controllers/shared_helper.dart';
-import 'package:tt9_betweener_challenge/models/user.dart';
+import 'package:tt9_betweener_challenge/features/auth/model/user.dart';
 import 'package:tt9_betweener_challenge/views/receive_view.dart';
 import 'package:tt9_betweener_challenge/views/widgets/sender_view.dart';
 import 'package:tt9_betweener_challenge/views/widgets/network_error_message.dart';
